@@ -73,4 +73,4 @@ Feel free to open issues, suggest improvements, or create PRs.
 ---
 
 ## 📄 License
-MIT License © 2025 [YourName]
+MIT License © 2025 [Manikanta__sai]
