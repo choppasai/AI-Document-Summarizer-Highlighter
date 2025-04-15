@@ -55,6 +55,11 @@ A Spring Boot-based application that leverages powerful AI models like **OpenAI 
 ✅ Designed with scalability, sharding & async processing in mind.
 
 ---
+## class Diagram
+
+![Screenshot (20)](https://github.com/user-attachments/assets/d1603591-9e07-4bda-a582-52d0884f11bb)
+
+---
 
 ## Tech Stack
 
