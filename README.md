@@ -1,6 +1,6 @@
 #  AI Document Summarizer & Highlighter
 
-A Spring Boot-based application that leverages powerful AI models like **OpenAI GPT** and **HuggingFace Transformers (T5, BART)** to generate intelligent document summaries, extract key highlights, and answer user questions from document content.
+A Spring Boot-based application that leverages powerful AI models like **OpenAI GPT** and **HuggingFace Transformers** to generate intelligent document summaries, extract key highlights, and answer user questions from document content.
 
 ---
 
@@ -44,26 +44,48 @@ A Spring Boot-based application that leverages powerful AI models like **OpenAI 
   - **Public shareable links**
 
 ---
+## 🧪 Back-of-the-Envelope Estimates
 
-##  Tech Stack
+- Average file size: **50 MB**
+- Daily active users: **10M**
+- Uploads/day: **20M**
+- Total daily storage: **~1 PB**
+- Est. requests/sec: **~1K RPS peak**
 
-- **Backend**: Spring Boot, Java 17
-- **AI Integration**: OpenAI API, HuggingFace API
-- **File Parsing**: Apache Tika, PDFBox
-- **Security**: Spring Security, JWT
-- **Database**: PostgreSQL 
-- **Frontend**:  React
-- **Build Tools**: Maven 
+✅ Designed with scalability, sharding & async processing in mind.
 
 ---
 
-##  Setup Instructions (Coming Soon)
-Instructions for:
-- Running locally
-- API reference
-- OpenAI token setup
-- Deployment on Render
+## Tech Stack
 
+| Layer         | Tech                                     |
+|---------------|------------------------------------------|
+| Language      | Java 17                                  |
+| Framework     | Spring Boot, Spring Security             |
+| AI Integration| OpenAI API / HuggingFace Transformers    |
+| File Parsing  | Apache Tika / PDFBox                     |
+| Database      | PostgreSQL + JPA/Hibernate               |
+| Storage       | AWS S3                                   |
+| Build Tool    | Maven                                    |
+| Deployment    | Docker + (K8s planned)                   |
+
+---
+
+## 🧰 Setup & Run (Local)
+
+### Prerequisites
+- Java 17+
+- Maven
+- PostgreSQL
+- AWS credentials (for S3)
+- OpenAI API Key
+
+### Running Locally
+
+bash
+ - git clone https://github.com/choppasai/AI-Document-Summarizer-Highlighter.git
+cd AI-Document-Summarizer-Highlighter
+./mvnw spring-boot:run
 
 ---
 
