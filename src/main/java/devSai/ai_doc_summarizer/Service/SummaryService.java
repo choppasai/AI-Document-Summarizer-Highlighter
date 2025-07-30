@@ -1,0 +1,153 @@
+package devSai.ai_doc_summarizer.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import devSai.ai_doc_summarizer.DTOs.ChoiceDTO;
+import devSai.ai_doc_summarizer.DTOs.SummarizationResponse;
+import devSai.ai_doc_summarizer.Models.Choice;
+import devSai.ai_doc_summarizer.Models.MessageContent;
+import devSai.ai_doc_summarizer.Models.Summary;
+import devSai.ai_doc_summarizer.Repositories.SummaryRepo;
+import lombok.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.util.ArrayList;
+
+import java.util.List;
+import java.net.URL;
+
+
+
+import org.json.JSONObject;
+import org.json.JSONArray;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class SummaryService {
+    @Value("${api.url}")
+    private String url;
+    private final URL obj = new URL(url);
+    @Value("${api.token}")
+    private String apiKey;
+    private final ObjectMapper objectMapper;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final SummaryRepo summaryRepo;
+
+    public SummaryService(SummaryRepo summaryRepo) throws IOException {
+
+        this.summaryRepo = summaryRepo;
+        this.objectMapper = new ObjectMapper();
+    }
+
+    public SummarizationResponse getSummary(String text) throws IOException {
+        List<String> chunks = splitTextToChunks(text);
+
+        List<SummarizationResponse> resultList = new ArrayList<>();
+
+        for (String chunk : chunks) {
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Authorization", "Bearer " + apiKey);
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setDoOutput(true);
+            JSONObject payload = new JSONObject();
+            payload.put("model", "sonar-pro");
+
+
+            JSONArray messages = new JSONArray();
+            JSONObject message = new JSONObject();
+            message.put("role", "user");
+            message.put("content", chunk);
+            messages.put(message);
+
+            payload.put("messages", messages);
+            logger.trace("serilzation ");
+            String jsonPayload = payload.toString();
+            logger.trace("deserilzation ");
+            try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+                wr.writeBytes(jsonPayload);
+                wr.flush();
+            }
+            int responseCode = con.getResponseCode();
+            System.out.println(responseCode);
+            InputStream responseStream;
+
+            if (responseCode >= 200 && responseCode < 300) {
+                responseStream = con.getInputStream();
+            } else {
+                responseStream = con.getErrorStream();  // this is important
+                logger.error("Error response code: " + responseCode);
+            }
+            logger.trace(" response code");
+
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(responseStream))) {
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+
+                SummarizationResponse chunkResult = objectMapper.readValue(response.toString(), SummarizationResponse.class);
+                resultList.add(chunkResult);
+            }
+
+        }
+
+        return mapResults(resultList);
+    }
+
+    public List<String> splitTextToChunks(String text) {
+        int length = text.length();
+        List<String> chunks = new ArrayList<>();
+        int maxLengthModelAccept = 512000;
+        if(length > maxLengthModelAccept){
+            for (int i = 0; i < length; i += maxLengthModelAccept) {
+                int end = Math.min(i + maxLengthModelAccept, length);
+                chunks.add(text.substring(i, end));
+            }
+        }
+        else
+            chunks.add(text);
+        return chunks;
+    }
+    @Transactional
+    public SummarizationResponse mapResults(List<SummarizationResponse> response) {
+        SummarizationResponse summarizationResponse = new SummarizationResponse();
+        Summary summary = new Summary();
+        StringBuilder fullSummary = new StringBuilder();
+        List<Choice> choiceList = new ArrayList<>();
+
+        for (SummarizationResponse response1 : response) {
+            for (ChoiceDTO choiceDTO : response1.getChoiceDTOs()) {
+                MessageContent messageContent = new MessageContent();
+                messageContent.setRole(choiceDTO.getMessageDTO().getRole());
+                messageContent.setContent(choiceDTO.getMessageDTO().getContent());
+
+                Choice choice = new Choice();
+                choice.setMessage(messageContent);
+                choiceList.add(choice);
+
+                fullSummary.append(choiceDTO.getMessageDTO().getContent()).append("\n\n");
+            }
+        }
+
+        summary.setContent(fullSummary.toString().trim());
+        summary.setChoices(choiceList);
+        summaryRepo.save(summary);
+        summarizationResponse.setModel(summary.getModel());
+        summarizationResponse.setCreated(summary.getCreated());
+        summarizationResponse.setContent(summary.getContent());
+        summarizationResponse.setCitations(summary.getCitations());
+        return summarizationResponse;
+    }
+
+}
+
+
