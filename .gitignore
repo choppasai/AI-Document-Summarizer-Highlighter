@@ -38,5 +38,3 @@ build/
 src/main/resources/secret.env
 src/main/resources/secret.env~
 
-
-sed -i 's/\r$//' .gitignore
