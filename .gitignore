@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+
+# Ignore secret files and backups
+src/main/resources/secret.env
+src/main/resources/secret.env~
+
+
+sed -i 's/\r$//' .gitignore

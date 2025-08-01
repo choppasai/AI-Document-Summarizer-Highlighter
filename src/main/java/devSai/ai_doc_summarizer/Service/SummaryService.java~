@@ -8,7 +8,6 @@ import devSai.ai_doc_summarizer.Models.Choice;
 import devSai.ai_doc_summarizer.Models.MessageContent;
 import devSai.ai_doc_summarizer.Models.Summary;
 import devSai.ai_doc_summarizer.Repositories.SummaryRepo;
-import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SummaryService {
     @Value("${api.url}")
-    private String url;
-    private final URL obj = new URL(url);
+    private final String url;
+
+//    = "https://api.perplexity.ai/chat/completions";
+//    private final URL obj = new URL(url);
     @Value("${api.token}")
     private String apiKey;
     private final ObjectMapper objectMapper;

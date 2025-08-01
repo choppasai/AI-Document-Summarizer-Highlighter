@@ -2,3 +2,7 @@
 * text=auto
 /mvnw text eol=lf
 *.cmd text eol=crlf
+*.properties text eol=lf
+*.java text eol=lf
+*.sh text eol=lfgit
+*.bat text eol=crlf
